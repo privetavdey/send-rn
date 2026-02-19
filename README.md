@@ -9,7 +9,7 @@ A React Native (Expo) port of the Provable wallet UI with Rive-animated navigati
 - For iOS: Xcode 15+ and CocoaPods
 - For Android: Android Studio with SDK 34+
 
-> **Important:** This app uses native modules (`rive-react-native`, `react-native-svg`, `expo-blur`), so it **cannot run in Expo Go**. You must use a **development build**.
+> **Important:** This app uses native modules (`@rive-app/react-native`, `react-native-svg`, `expo-blur`), so it **cannot run in Expo Go**. You must use a **development build**.
 
 ## Setup
 
@@ -82,7 +82,7 @@ ProvableRiveTestRN/
 │   │       ├── history_icon.riv
 │   │       └── settings_icon.riv
 │   ├── components/
-│   │   ├── NavIcon.tsx              # Rive-powered nav icon with workarounds
+│   │   ├── NavIcon.tsx              # Rive-powered nav icon
 │   │   └── OnrampOfframp.tsx        # Main wallet screen
 │   └── constants/
 │       └── styles.ts                # Design tokens (colors, spacing, radii)
@@ -98,25 +98,9 @@ Each `.riv` file follows the same structure:
 | **Boolean Input** | `On` |
 | **Artboard** | Default |
 
-The `NavIcon` component includes workarounds for known `rive-react-native` issues:
+The `NavIcon` component uses `@rive-app/react-native` (Nitro-based runtime) with:
 
-1. **Flash prevention** — Icons start at `opacity: 0` until the state machine input is confirmed set
-2. **Input race condition** — A small platform-specific delay (`50ms` iOS, `80ms` Android) is applied between `setInputState` calls to avoid the sequential call bug ([#265](https://github.com/rive-app/rive-react-native/issues/265))
-3. **Cross-platform callbacks** — Both `onPause` (iOS) and `onStop` (Android) are handled for animation completion detection
-
-## Known Issues & Workarounds
-
-| Issue | Platform | Workaround |
-|-------|----------|------------|
-| Autoplay flash (icons briefly show "on" state) | Both | Opacity gate in `NavIcon` |
-| `pause()` then `play()` doesn't restart | iOS | Avoid pause/play cycles; use state machine inputs |
-| Sequential `setInputState` drops calls | Both | setTimeout delay between calls |
-| `onPause` vs `onStop` for animation end | iOS vs Android | Handle both callbacks |
-
-## Migrating to the New Runtime
-
-When ready, consider migrating to `@rive-app/react-native` (Nitro-based):
-- [Migration Guide](https://rive.app/docs/runtimes/react-native/migration-guide)
-- [New Runtime Repo](https://github.com/rive-app/rive-nitro-react-native)
-
-The new runtime uses `useRiveFile` hook + `RiveView` component instead of the legacy `<Rive />` ref-based API.
+- `useRiveFile()` to load each `.riv` file via `require()`
+- `useRive()` to get a ref for imperative control
+- `setBooleanInputValue('On', isActive)` to toggle the icon state
+- `playIfNeeded()` to ensure the state machine updates after input changes
