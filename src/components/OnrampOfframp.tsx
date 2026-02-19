@@ -18,6 +18,7 @@ import { COLORS, SPACING, BORDER_RADIUS } from '../constants/styles';
 import { NavIcon } from './NavIcon';
 
 const homeIconRiv = require('../assets/rive/home_icon.riv');
+const browserIconRiv = require('../assets/rive/browser_icon.riv');
 const historyIconRiv = require('../assets/rive/history_icon.riv');
 const settingsIconRiv = require('../assets/rive/settings_icon.riv');
 
@@ -186,7 +187,7 @@ export default function OnrampOfframp() {
             </View>
             <View style={styles.navItem}>
               <NavIcon
-                source={historyIconRiv}
+                source={browserIconRiv}
                 isActive={activeTab === 1}
                 onPress={() => setActiveTab(1)}
                 size={24}
@@ -194,9 +195,17 @@ export default function OnrampOfframp() {
             </View>
             <View style={styles.navItem}>
               <NavIcon
-                source={settingsIconRiv}
+                source={historyIconRiv}
                 isActive={activeTab === 2}
                 onPress={() => setActiveTab(2)}
+                size={24}
+              />
+            </View>
+            <View style={styles.navItem}>
+              <NavIcon
+                source={settingsIconRiv}
+                isActive={activeTab === 3}
+                onPress={() => setActiveTab(3)}
                 size={24}
               />
             </View>
@@ -424,7 +433,7 @@ const styles = StyleSheet.create({
   bottomNavOuter: {
     position: 'absolute',
     bottom: 42,
-    width: 232,
+    width: 280,
     height: 64,
     borderRadius: BORDER_RADIUS.lg,
     overflow: 'hidden',
