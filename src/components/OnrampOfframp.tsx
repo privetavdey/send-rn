@@ -1,7 +1,7 @@
 /**
  * OnrampOfframp — Main wallet screen ported to React Native.
  */
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,9 +13,9 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-
 import { COLORS, SPACING, BORDER_RADIUS } from '../constants/styles';
 import { NavIcon } from './NavIcon';
+import { RefreshLoader } from './RefreshLoader';
 
 const homeIconRiv = require('../assets/rive/home_icon.riv');
 const browserIconRiv = require('../assets/rive/browser_icon.riv');
@@ -68,6 +68,16 @@ const TOKENS: TokenItem[] = [
 
 export default function OnrampOfframp() {
   const [activeTab, setActiveTab] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(() => {
+    if (refreshing) return;
+    setRefreshing(true);
+  }, [refreshing]);
+
+  const handleRefreshFinished = useCallback(() => {
+    setRefreshing(false);
+  }, []);
 
   const renderTokenIcon = (type: TokenItem['icon']) => {
     switch (type) {
@@ -109,11 +119,25 @@ export default function OnrampOfframp() {
           <View style={styles.headerButton}>
             <QrCodeIcon width={20} height={20} />
           </View>
-          <View style={styles.headerButton}>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={handleRefresh}
+            activeOpacity={0.7}
+          >
             <ScanIcon width={20} height={20} />
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
+
+      {/* ── Pull-to-refresh Loader ── */}
+      {refreshing && (
+        <View style={styles.loaderContainer}>
+          <RefreshLoader
+            style={styles.loaderRive}
+            onFinished={handleRefreshFinished}
+          />
+        </View>
+      )}
 
       {/* ── Balance Card ── */}
       <LinearGradient
@@ -266,6 +290,18 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  // Loader
+  loaderContainer: {
+    width: CONTENT_WIDTH - 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.sm,
+  },
+  loaderRive: {
+    width: CONTENT_WIDTH - 40,
+    height: 120,
   },
 
   // Balance
