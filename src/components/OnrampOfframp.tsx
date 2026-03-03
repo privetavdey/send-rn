@@ -16,6 +16,7 @@ import { BlurView } from 'expo-blur';
 import { COLORS, SPACING, BORDER_RADIUS } from '../constants/styles';
 import { NavIcon } from './NavIcon';
 import { RefreshLoader } from './RefreshLoader';
+import { SendModal, type RiveInputs } from './SendModal';
 
 const homeIconRiv = require('../assets/rive/home_icon.riv');
 const browserIconRiv = require('../assets/rive/browser_icon.riv');
@@ -45,11 +46,11 @@ const CONTENT_WIDTH = Math.min(SCREEN_WIDTH, 393);
 
 // ─── Action button data ──────────────────────────────────────────────
 const ACTION_BUTTONS = [
-  { Icon: SendIcon, label: 'SEND' },
-  { Icon: ReceiveIcon, label: 'RECEIVE' },
-  { Icon: ShieldIcon, label: 'SHIELD' },
-  { Icon: SwapIcon, label: 'SWAP' },
-  { Icon: RecordsIcon, label: 'RECORDS' },
+  { Icon: SendIcon, label: 'SEND', action: 'send' as const },
+  { Icon: ReceiveIcon, label: 'RECEIVE', action: null },
+  { Icon: ShieldIcon, label: 'SHIELD', action: null },
+  { Icon: SwapIcon, label: 'SWAP', action: null },
+  { Icon: RecordsIcon, label: 'RECORDS', action: null },
 ];
 
 // ─── Token list data ─────────────────────────────────────────────────
@@ -66,9 +67,15 @@ const TOKENS: TokenItem[] = [
   { icon: 'vusdc', name: 'vUSDC', amount: '0 VUSDC', value: '$0.00' },
 ];
 
-export default function OnrampOfframp() {
+interface OnrampOfframpProps {
+  riveInputs: RiveInputs;
+  onToggle: (key: keyof RiveInputs, value: boolean) => void;
+}
+
+export default function OnrampOfframp({ riveInputs, onToggle }: OnrampOfframpProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [isSendModalOpen, setIsSendModalOpen] = useState(false);
 
   const handleRefresh = useCallback(() => {
     if (refreshing) return;
@@ -159,11 +166,30 @@ export default function OnrampOfframp() {
       {/* ── Action Buttons ── */}
       <View style={styles.actionsRow}>
         {ACTION_BUTTONS.map((item, index) => (
-          <TouchableOpacity key={index} style={styles.actionItem} activeOpacity={0.7}>
+          <TouchableOpacity
+            key={index}
+            style={styles.actionItem}
+            activeOpacity={0.7}
+            onPress={item.action === 'send' ? () => setIsSendModalOpen(true) : undefined}
+          >
             <View style={styles.actionIconBox}>
               <item.Icon width={24} height={24} color="white" />
             </View>
             <Text style={styles.actionLabel}>{item.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* ── State Machine Harness ── */}
+      <View style={styles.harnessRow}>
+        {(['isSend', 'isShield', 'isSwap'] as const).map((key) => (
+          <TouchableOpacity
+            key={key}
+            onPress={() => onToggle(key, !riveInputs[key])}
+            style={[styles.harnessToggle, riveInputs[key] ? styles.harnessOn : styles.harnessOff]}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.harnessText}>{key}: {riveInputs[key] ? 'ON' : 'OFF'}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -243,6 +269,12 @@ export default function OnrampOfframp() {
       <View style={styles.homeIndicator}>
         <View style={styles.homeIndicatorBar} />
       </View>
+
+      <SendModal
+        isOpen={isSendModalOpen}
+        onClose={() => setIsSendModalOpen(false)}
+        riveInputs={riveInputs}
+      />
     </View>
   );
 }
@@ -373,6 +405,23 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     textAlign: 'center',
   },
+
+  // Harness
+  harnessRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: SPACING.sm,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
+  harnessToggle: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+  harnessOn: { backgroundColor: '#13bc80' },
+  harnessOff: { backgroundColor: '#333' },
+  harnessText: { color: '#fff', fontSize: 11, fontWeight: '600' },
 
   // Token List
   tokenListContainer: {

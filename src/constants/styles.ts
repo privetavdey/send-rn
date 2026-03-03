@@ -11,6 +11,11 @@ export const COLORS = {
   BORDER: 'rgba(255, 255, 255, 0.1)',
   BORDER_SUBTLE: 'rgba(255, 255, 255, 0.04)',
   BG_SUBTLE: 'rgba(255, 255, 255, 0.08)',
+  SHEET_BG: '#131111',
+  SHIMMER_BASE: 'rgba(255, 255, 255, 0.48)',
+  SHIMMER_HIGHLIGHT: 'rgba(255, 255, 255, 0.88)',
+  BACKDROP: 'rgba(11, 6, 5, 0.5)',
+  HANDLE: 'rgba(255, 255, 255, 0.2)',
 } as const;
 
 export const OPACITY = {
