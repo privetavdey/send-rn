@@ -13,7 +13,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import { COLORS, SPACING, BORDER_RADIUS } from '../constants/styles';
+import { SPACING, BORDER_RADIUS } from '../constants/styles';
+import { useThemeColors } from '../constants/ThemeContext';
 import { NavIcon } from './NavIcon';
 import { RefreshLoader } from './RefreshLoader';
 import { SendModal, type RiveInputs } from './SendModal';
@@ -73,6 +74,7 @@ interface OnrampOfframpProps {
 }
 
 export default function OnrampOfframp({ riveInputs, onToggle }: OnrampOfframpProps) {
+  const colors = useThemeColors();
   const [activeTab, setActiveTab] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
@@ -86,34 +88,38 @@ export default function OnrampOfframp({ riveInputs, onToggle }: OnrampOfframpPro
     setRefreshing(false);
   }, []);
 
+  const tokenIconStyle = [styles.tokenIconContainer, { borderColor: colors.BORDER, backgroundColor: colors.BACKGROUND }];
+
   const renderTokenIcon = (type: TokenItem['icon']) => {
     switch (type) {
       case 'aleo':
         return (
-          <View style={styles.tokenIconContainer}>
+          <View style={tokenIconStyle}>
             <AleoLogoIcon width={32} height={32} />
           </View>
         );
       case 'pondo':
         return (
-          <View style={styles.tokenIconContainer}>
+          <View style={tokenIconStyle}>
             <Image source={pondoLogo} style={styles.tokenImage} />
           </View>
         );
       case 'vusdc':
         return (
-          <View style={styles.tokenIconContainer}>
+          <View style={tokenIconStyle}>
             <Image source={vusdcLogo} style={styles.tokenImage} />
           </View>
         );
     }
   };
 
+  const isDark = riveInputs.isDark;
+
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.BACKGROUND }]}>
       {/* ── Header ── */}
       <View style={styles.header}>
-        <View style={styles.profileImageWrapper}>
+        <View style={[styles.profileImageWrapper, { borderColor: colors.BORDER }]}>
           <Image source={profileImage} style={styles.profileImage} />
           <LinearGradient
             colors={['rgba(0,212,255,1)', 'rgba(9,9,121,1)']}
@@ -123,15 +129,15 @@ export default function OnrampOfframp({ riveInputs, onToggle }: OnrampOfframpPro
           />
         </View>
         <View style={styles.headerActions}>
-          <View style={styles.headerButton}>
-            <QrCodeIcon width={20} height={20} />
+          <View style={[styles.headerButton, { backgroundColor: colors.BG_SUBTLE }]}>
+            <QrCodeIcon width={20} height={20} color={colors.TEXT_PRIMARY} />
           </View>
           <TouchableOpacity
-            style={styles.headerButton}
+            style={[styles.headerButton, { backgroundColor: colors.BG_SUBTLE }]}
             onPress={handleRefresh}
             activeOpacity={0.7}
           >
-            <ScanIcon width={20} height={20} />
+            <ScanIcon width={20} height={20} color={colors.TEXT_PRIMARY} />
           </TouchableOpacity>
         </View>
       </View>
@@ -148,17 +154,17 @@ export default function OnrampOfframp({ riveInputs, onToggle }: OnrampOfframpPro
 
       {/* ── Balance Card ── */}
       <LinearGradient
-        colors={['rgba(255,255,255,0)', COLORS.BG_SUBTLE]}
+        colors={['transparent', colors.BG_SUBTLE]}
         style={styles.balanceCard}
       >
-        <Text style={styles.balanceLabel}>Balance</Text>
+        <Text style={[styles.balanceLabel, { color: colors.TEXT_PRIMARY }]}>Balance</Text>
         <View style={styles.balanceRow}>
-          <Text style={styles.balanceAmount}>
+          <Text style={[styles.balanceAmount, { color: colors.TEXT_PRIMARY }]}>
             $17,657
-            <Text style={styles.balanceCents}>.89</Text>
+            <Text style={{ color: colors.TEXT_TERTIARY }}>.89</Text>
           </Text>
-          <View style={styles.arrowButton}>
-            <ArrowDownIcon width={11} height={7} color={COLORS.TEXT_PRIMARY} />
+          <View style={[styles.arrowButton, { backgroundColor: colors.BG_SUBTLE }]}>
+            <ArrowDownIcon width={11} height={7} color={colors.TEXT_PRIMARY} />
           </View>
         </View>
       </LinearGradient>
@@ -172,10 +178,10 @@ export default function OnrampOfframp({ riveInputs, onToggle }: OnrampOfframpPro
             activeOpacity={0.7}
             onPress={item.action === 'send' ? () => setIsSendModalOpen(true) : undefined}
           >
-            <View style={styles.actionIconBox}>
-              <item.Icon width={24} height={24} color="white" />
+            <View style={[styles.actionIconBox, { backgroundColor: colors.BG_SUBTLE }]}>
+              <item.Icon width={24} height={24} color={colors.TEXT_PRIMARY} />
             </View>
-            <Text style={styles.actionLabel}>{item.label}</Text>
+            <Text style={[styles.actionLabel, { color: colors.TEXT_PRIMARY }]}>{item.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -192,11 +198,23 @@ export default function OnrampOfframp({ riveInputs, onToggle }: OnrampOfframpPro
             <Text style={styles.harnessText}>{key}: {riveInputs[key] ? 'ON' : 'OFF'}</Text>
           </TouchableOpacity>
         ))}
+        <TouchableOpacity
+          onPress={() => onToggle('isDark', !riveInputs.isDark)}
+          style={[
+            styles.harnessToggle,
+            { backgroundColor: isDark ? '#1a1a1a' : '#e5e5e5', borderWidth: 1, borderColor: isDark ? '#444' : '#ccc' },
+          ]}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.harnessText, { color: isDark ? '#fff' : '#000' }]}>
+            {isDark ? '● Dark' : '○ Light'}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* ── Token List ── */}
       <LinearGradient
-        colors={[COLORS.BG_SUBTLE, 'rgba(255,255,255,0)']}
+        colors={[colors.BG_SUBTLE, 'transparent']}
         style={styles.tokenListContainer}
       >
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.tokenListContent}>
@@ -205,27 +223,34 @@ export default function OnrampOfframp({ riveInputs, onToggle }: OnrampOfframpPro
               {renderTokenIcon(token.icon)}
               <View style={styles.tokenInfo}>
                 <View>
-                  <Text style={styles.tokenName}>{token.name}</Text>
-                  <Text style={styles.tokenAmount}>{token.amount}</Text>
+                  <Text style={[styles.tokenName, { color: colors.TEXT_PRIMARY }]}>{token.name}</Text>
+                  <Text style={[styles.tokenAmount, { color: colors.TEXT_SECONDARY }]}>{token.amount}</Text>
                 </View>
-                <Text style={styles.tokenValue}>{token.value}</Text>
+                <Text style={[styles.tokenValue, { color: colors.TEXT_PRIMARY }]}>{token.value}</Text>
               </View>
             </View>
           ))}
 
           {/* Manage tokens */}
           <View style={styles.manageTokensContainer}>
-            <Text style={styles.manageTokensText}>Don't see your token?</Text>
-            <TouchableOpacity style={styles.manageTokensButton} activeOpacity={0.7}>
-              <Text style={styles.manageTokensButtonText}>Manage tokens</Text>
+            <Text style={[styles.manageTokensText, { color: colors.TEXT_PRIMARY }]}>Don't see your token?</Text>
+            <TouchableOpacity
+              style={[styles.manageTokensButton, { backgroundColor: colors.BG_SUBTLE, borderColor: colors.BORDER_SUBTLE }]}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.manageTokensButtonText, { color: colors.TEXT_QUINARY }]}>Manage tokens</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </LinearGradient>
 
       {/* ── Bottom Nav Bar ── */}
-      <View style={styles.bottomNavOuter}>
-        <BlurView intensity={40} tint="dark" style={styles.bottomNavBlur}>
+      <View style={[styles.bottomNavOuter, { borderColor: colors.BORDER_SUBTLE }]}>
+        <BlurView
+          intensity={40}
+          tint={isDark ? 'dark' : 'light'}
+          style={[styles.bottomNavBlur, { backgroundColor: isDark ? 'rgba(9,7,7,0.64)' : 'rgba(255,255,255,0.72)' }]}
+        >
           <View style={styles.bottomNavInner}>
             <View style={styles.navItem}>
               <NavIcon
@@ -261,13 +286,12 @@ export default function OnrampOfframp({ riveInputs, onToggle }: OnrampOfframpPro
             </View>
           </View>
         </BlurView>
-        {/* Inner glow overlay */}
-        <View style={styles.navGlow} pointerEvents="none" />
+        <View style={[styles.navGlow, { borderColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }]} pointerEvents="none" />
       </View>
 
       {/* ── Home Indicator ── */}
       <View style={styles.homeIndicator}>
-        <View style={styles.homeIndicatorBar} />
+        <View style={[styles.homeIndicatorBar, { backgroundColor: colors.TEXT_PRIMARY }]} />
       </View>
 
       <SendModal
@@ -283,7 +307,6 @@ export default function OnrampOfframp({ riveInputs, onToggle }: OnrampOfframpPro
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
     alignItems: 'center',
     paddingTop: 70,
     paddingHorizontal: SPACING.xs,
@@ -302,7 +325,6 @@ const styles = StyleSheet.create({
     height: 28,
     borderRadius: BORDER_RADIUS.full,
     borderWidth: 0.5,
-    borderColor: COLORS.BORDER,
     overflow: 'hidden',
   },
   profileImage: {
@@ -318,7 +340,6 @@ const styles = StyleSheet.create({
   headerButton: {
     width: 32,
     height: 32,
-    backgroundColor: COLORS.BG_SUBTLE,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
@@ -350,7 +371,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 15,
     lineHeight: 15 * 1.35,
-    color: COLORS.TEXT_PRIMARY,
     opacity: 0.48,
     marginBottom: SPACING.sm,
   },
@@ -362,16 +382,11 @@ const styles = StyleSheet.create({
   balanceAmount: {
     fontSize: 40,
     fontWeight: '500',
-    color: COLORS.TEXT_PRIMARY,
     letterSpacing: -0.8,
-  },
-  balanceCents: {
-    color: COLORS.TEXT_TERTIARY,
   },
   arrowButton: {
     width: 24,
     height: 24,
-    backgroundColor: COLORS.BG_SUBTLE,
     borderRadius: BORDER_RADIUS.md,
     alignItems: 'center',
     justifyContent: 'center',
@@ -392,7 +407,6 @@ const styles = StyleSheet.create({
   actionIconBox: {
     width: 48,
     height: 48,
-    backgroundColor: COLORS.BG_SUBTLE,
     borderRadius: BORDER_RADIUS.sm,
     alignItems: 'center',
     justifyContent: 'center',
@@ -400,7 +414,6 @@ const styles = StyleSheet.create({
   actionLabel: {
     fontSize: 11,
     fontWeight: '700',
-    color: COLORS.TEXT_PRIMARY,
     letterSpacing: 0.66,
     textTransform: 'uppercase',
     textAlign: 'center',
@@ -445,8 +458,6 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: BORDER_RADIUS.full,
     borderWidth: 1,
-    borderColor: COLORS.BORDER,
-    backgroundColor: COLORS.BACKGROUND,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -465,13 +476,11 @@ const styles = StyleSheet.create({
   tokenName: {
     fontSize: 15,
     fontWeight: '600',
-    color: COLORS.TEXT_PRIMARY,
     lineHeight: 15 * 1.35,
     letterSpacing: 0.15,
   },
   tokenAmount: {
     fontSize: 13,
-    color: COLORS.TEXT_SECONDARY,
     lineHeight: 13 * 1.4,
     letterSpacing: 0.13,
     textTransform: 'uppercase',
@@ -479,7 +488,6 @@ const styles = StyleSheet.create({
   tokenValue: {
     fontSize: 15,
     fontWeight: '600',
-    color: COLORS.TEXT_PRIMARY,
     lineHeight: 15 * 1.35,
     letterSpacing: 0.15,
     textTransform: 'uppercase',
@@ -496,14 +504,11 @@ const styles = StyleSheet.create({
   manageTokensText: {
     fontSize: 15,
     fontWeight: '500',
-    color: COLORS.TEXT_PRIMARY,
   },
   manageTokensButton: {
     height: 40,
-    backgroundColor: COLORS.BG_SUBTLE,
     borderRadius: BORDER_RADIUS.full,
     borderWidth: 1,
-    borderColor: COLORS.BORDER_SUBTLE,
     paddingHorizontal: SPACING.md,
     alignItems: 'center',
     justifyContent: 'center',
@@ -511,7 +516,6 @@ const styles = StyleSheet.create({
   manageTokensButtonText: {
     fontSize: 15,
     fontWeight: '600',
-    color: COLORS.TEXT_QUINARY,
   },
 
   // Bottom Nav
@@ -523,11 +527,9 @@ const styles = StyleSheet.create({
     borderRadius: BORDER_RADIUS.lg,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: COLORS.BORDER_SUBTLE,
   },
   bottomNavBlur: {
     flex: 1,
-    backgroundColor: 'rgba(9,7,7,0.64)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: SPACING.sm,
@@ -550,10 +552,7 @@ const styles = StyleSheet.create({
   navGlow: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: BORDER_RADIUS.lg,
-    // Approximate inner glow — shadow inset isn't supported in RN,
-    // so we fake it with a semi-transparent border + shadow
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
   },
 
   // Home Indicator
@@ -569,6 +568,5 @@ const styles = StyleSheet.create({
     width: 139,
     height: 5,
     borderRadius: 100,
-    backgroundColor: COLORS.TEXT_PRIMARY,
   },
 });

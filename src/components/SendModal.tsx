@@ -18,7 +18,8 @@ import {
   Fit,
   Alignment,
 } from '@rive-app/react-native';
-import { COLORS, BORDER_RADIUS, SPACING } from '../constants/styles';
+import { BORDER_RADIUS, SPACING } from '../constants/styles';
+import { useThemeColors } from '../constants/ThemeContext';
 
 const transactionRiv = require('../assets/rive/transaction.riv');
 
@@ -33,6 +34,7 @@ export interface RiveInputs {
   isShield: boolean;
   isSwap: boolean;
   isSend: boolean;
+  isDark: boolean;
 }
 
 interface SendModalProps {
@@ -70,6 +72,7 @@ export const SendModal: React.FC<SendModalProps> = ({
   onClose,
   riveInputs,
 }) => {
+  const colors = useThemeColors();
   const [isVisible, setIsVisible] = useState(false);
   const [localDone, setLocalDone] = useState(false);
 
@@ -91,8 +94,9 @@ export const SendModal: React.FC<SendModalProps> = ({
     riveViewRef.setBooleanInputValue('isShield', riveInputs.isShield);
     riveViewRef.setBooleanInputValue('isSwap', riveInputs.isSwap);
     riveViewRef.setBooleanInputValue('isSend', riveInputs.isSend);
+    riveViewRef.setBooleanInputValue('isDark', riveInputs.isDark);
     riveViewRef.playIfNeeded();
-  }, [riveViewRef, localDone, riveInputs.isShield, riveInputs.isSwap, riveInputs.isSend]);
+  }, [riveViewRef, localDone, riveInputs.isShield, riveInputs.isSwap, riveInputs.isSend, riveInputs.isDark]);
 
   useEffect(() => {
     if (isOpen) {
@@ -164,14 +168,16 @@ export const SendModal: React.FC<SendModalProps> = ({
 
   if (!isVisible) return null;
 
+  const isDark = riveInputs.isDark;
+
   return (
     <Modal visible={isVisible} transparent animationType="none" onRequestClose={handleClose}>
       <View style={StyleSheet.absoluteFill}>
         {/* Backdrop */}
         <Pressable style={StyleSheet.absoluteFill} onPress={handleClose}>
-          <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: COLORS.BACKDROP, opacity: backdropOpacity }]} />
+          <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: colors.BACKDROP, opacity: backdropOpacity }]} />
           <Animated.View style={[StyleSheet.absoluteFill, styles.blurWrap, { opacity: backdropOpacity }]} pointerEvents="none">
-            <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+            <BlurView intensity={20} tint={isDark ? 'dark' : 'light'} style={StyleSheet.absoluteFill} />
           </Animated.View>
         </Pressable>
 
@@ -179,7 +185,7 @@ export const SendModal: React.FC<SendModalProps> = ({
         <Animated.View
           style={[
             styles.sheet,
-            { width: screenWidth, height: SHEET_HEIGHT, backgroundColor: COLORS.SHEET_BG },
+            { width: screenWidth, height: SHEET_HEIGHT, backgroundColor: colors.SHEET_BG },
             { transform: [{ translateY: sheetTranslateY }] },
           ]}
         >
@@ -196,7 +202,7 @@ export const SendModal: React.FC<SendModalProps> = ({
                 style={styles.rive}
               />
             )}
-            <View style={[styles.handleBar, { backgroundColor: COLORS.HANDLE }]} />
+            <View style={[styles.handleBar, { backgroundColor: colors.HANDLE }]} />
           </View>
 
           <ScrollView
@@ -207,19 +213,19 @@ export const SendModal: React.FC<SendModalProps> = ({
             {/* Text */}
             <View style={styles.textBlock}>
               <Animated.View style={[styles.headlineRow, { opacity: stagger1Opacity, transform: [{ translateY: stagger1TranslateY }] }]}>
-                <Text style={[styles.headline, { color: COLORS.SHIMMER_HIGHLIGHT, opacity: localDone ? 0 : 1 }]} numberOfLines={1}>
+                <Text style={[styles.headline, { color: colors.SHIMMER_HIGHLIGHT, opacity: localDone ? 0 : 1 }]} numberOfLines={1}>
                   {headlines.pending}
                 </Text>
-                <Text style={[styles.headline, { color: COLORS.TEXT_PRIMARY, opacity: localDone ? 1 : 0 }]} numberOfLines={1}>
+                <Text style={[styles.headline, { color: colors.TEXT_PRIMARY, opacity: localDone ? 1 : 0 }]} numberOfLines={1}>
                   {headlines.done}
                 </Text>
               </Animated.View>
 
               <Animated.View style={[styles.subRow, { opacity: stagger2Opacity, transform: [{ translateY: stagger2TranslateY }] }]}>
-                <Text style={[styles.subText, { color: COLORS.TEXT_PRIMARY, opacity: localDone ? 0 : 1 }]}>
+                <Text style={[styles.subText, { color: colors.TEXT_PRIMARY, opacity: localDone ? 0 : 1 }]}>
                   {headlines.pendingSub}
                 </Text>
-                <Text style={[styles.subText, { color: COLORS.TEXT_PRIMARY, opacity: localDone ? 1 : 0 }]}>
+                <Text style={[styles.subText, { color: colors.TEXT_PRIMARY, opacity: localDone ? 1 : 0 }]}>
                   {headlines.doneSub}
                 </Text>
               </Animated.View>
@@ -228,11 +234,11 @@ export const SendModal: React.FC<SendModalProps> = ({
             {/* Done button */}
             <Animated.View style={[styles.doneButtonWrap, { opacity: buttonOpacity, transform: [{ translateY: buttonTranslateY }] }]}>
               <TouchableOpacity
-                style={[styles.doneButton, { backgroundColor: COLORS.TEXT_PRIMARY }]}
+                style={[styles.doneButton, { backgroundColor: colors.TEXT_PRIMARY }]}
                 onPress={handleClose}
                 activeOpacity={0.8}
               >
-                <Text style={[styles.doneButtonText, { color: COLORS.BACKGROUND }]}>Done</Text>
+                <Text style={[styles.doneButtonText, { color: colors.BACKGROUND }]}>Done</Text>
               </TouchableOpacity>
             </Animated.View>
 

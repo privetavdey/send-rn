@@ -1,6 +1,6 @@
 // Design tokens ported to React Native (numeric values for StyleSheet)
 
-export const COLORS = {
+export const DARK_COLORS = {
   BACKGROUND: '#090707',
   TEXT_PRIMARY: '#ffffff',
   TEXT_SECONDARY: 'rgba(255, 255, 255, 0.5)',
@@ -16,7 +16,30 @@ export const COLORS = {
   SHIMMER_HIGHLIGHT: 'rgba(255, 255, 255, 0.88)',
   BACKDROP: 'rgba(11, 6, 5, 0.5)',
   HANDLE: 'rgba(255, 255, 255, 0.2)',
-} as const;
+};
+
+export type ColorTheme = { [K in keyof typeof DARK_COLORS]: string };
+
+export const LIGHT_COLORS: ColorTheme = {
+  BACKGROUND: '#ffffff',
+  TEXT_PRIMARY: '#000000',
+  TEXT_SECONDARY: 'rgba(0, 0, 0, 0.5)',
+  TEXT_TERTIARY: 'rgba(0, 0, 0, 0.32)',
+  TEXT_QUATERNARY: 'rgba(0, 0, 0, 0.48)',
+  TEXT_QUINARY: 'rgba(0, 0, 0, 0.88)',
+  ACCENT_GREEN: '#13bc80',
+  BORDER: 'rgba(0, 0, 0, 0.1)',
+  BORDER_SUBTLE: 'rgba(0, 0, 0, 0.04)',
+  BG_SUBTLE: 'rgba(0, 0, 0, 0.06)',
+  SHEET_BG: '#f5f5f5',
+  SHIMMER_BASE: 'rgba(0, 0, 0, 0.48)',
+  SHIMMER_HIGHLIGHT: 'rgba(0, 0, 0, 0.88)',
+  BACKDROP: 'rgba(0, 0, 0, 0.25)',
+  HANDLE: 'rgba(0, 0, 0, 0.2)',
+};
+
+/** @deprecated Use DARK_COLORS or LIGHT_COLORS via useThemeColors() */
+export const COLORS = DARK_COLORS;
 
 export const OPACITY = {
   FULL: 1,
